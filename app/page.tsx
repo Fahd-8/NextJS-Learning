@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import UrlShortenerForm from './ShortenForm';
 
-// Define interfaces for our data
 interface Item {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   price: number;
@@ -18,16 +18,15 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch data from FastAPI backend
     const fetchItems = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:8000/api/items');
+        const response = await axios.get('http://127.0.0.1:8002/api/items');
         setItems(response.data);
         setError(null);
       } catch (err) {
         console.error('Error fetching items:', err);
-        setError('Failed to fetch items. Is the API server running?');
+        setError('Failed to fetch items from backend.');
       } finally {
         setLoading(false);
       }
@@ -37,51 +36,58 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
-        <h1 className="text-4xl font-bold mb-8">NextJS + FastAPI Tutorial</h1>
-        
-        {loading && <p className="text-lg">Loading items...</p>}
-        
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <p>{error}</p>
-            <p className="text-sm mt-2">
-              Make sure your FastAPI server is running on http://localhost:8000
-            </p>
-          </div>
-        )}
+    <main className="bg-gray-50 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto space-y-12">
+        <header className="text-center">
+          <h1 className="text-5xl font-extrabold text-gray-900 mb-2">🛍️ Tech Shop</h1>
+          <p className="text-lg text-gray-500">Your go-to place for gadgets + tools</p>
+        </header>
 
-        {!loading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="border rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow"
-              >
-                <h2 className="text-xl font-semibold">{item.name}</h2>
-                <p className="text-gray-600 mt-2">{item.description || 'No description'}</p>
-                <p className="text-lg font-bold mt-2">${item.price.toFixed(2)}</p>
-                <p className="mt-2">
-                  Status:{' '}
+        {/* Shortener */}
+        <section className="flex justify-center">
+          <UrlShortenerForm />
+        </section>
+
+        {/* Products */}
+        <section>
+          <h2 className="text-3xl font-bold mb-6 text-gray-800">📦 Available Products</h2>
+
+          {loading && <p className="text-lg">Loading items...</p>}
+
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              <p>{error}</p>
+            </div>
+          )}
+
+          {!loading && !error && items.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white border rounded-xl shadow-md hover:shadow-xl transition p-5"
+                >
+                  <h3 className="text-xl font-semibold text-gray-800">{item.name}</h3>
+                  <p className="text-gray-500 mt-1">{item.description || 'No description'}</p>
+                  <p className="text-lg font-bold text-indigo-600 mt-3">${item.price.toFixed(2)}</p>
                   <span
-                    className={`px-2 py-1 text-sm rounded ${
+                    className={`inline-block mt-2 px-3 py-1 text-sm rounded-full font-medium ${
                       item.is_available
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
                     }`}
                   >
                     {item.is_available ? 'Available' : 'Sold Out'}
                   </span>
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+                </div>
+              ))}
+            </div>
+          )}
 
-        {!loading && !error && items.length === 0 && (
-          <p className="text-lg">No items found.</p>
-        )}
+          {!loading && !error && items.length === 0 && (
+            <p className="text-lg text-gray-500">No items found.</p>
+          )}
+        </section>
       </div>
     </main>
   );
